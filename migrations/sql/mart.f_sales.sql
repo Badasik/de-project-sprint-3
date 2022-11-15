@@ -16,4 +16,5 @@ SELECT dc.date_id,
 	   '{{ds}}' as start_date,
 	   '{{ds}}' as end_date
   FROM staging.user_order_log uol
-  LEFT JOIN mart.d_calendar dc on uol.date_time::date = dc.date_actual;
+  LEFT JOIN mart.d_calendar dc on uol.date_time::date = dc.date_actual
+  ON CONFLICT DO NOTHING;

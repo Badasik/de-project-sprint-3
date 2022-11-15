@@ -74,3 +74,4 @@ SELECT s.period_name,
         FROM refunded_customer c
        GROUP BY c.period_id, c.item_id) refunded_customer
     ON s.period_id = refunded_customer.period_id AND s.item_id = refunded_customer.item_id
+ON CONFLICT DO NOTHING;
