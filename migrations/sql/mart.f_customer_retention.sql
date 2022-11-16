@@ -38,40 +38,50 @@ WITH summary AS (
        			SELECT DISTINCT 'weekly' AS period_name, period_id, item_id
                   FROM summary
      )
-SELECT s.period_name,
-       s.period_id,
-       s.item_id,
-       new_customers.new_customers_count,
-       new_customers.new_customers_revenue,
-       returning_customers.returning_customers_count,
-       returning_customers.returning_customers_revenue,
-       refunded_customer.refunded_customer_count,
-       refunded_customer.customers_refunded
-  FROM summary_ids s
-  LEFT JOIN
-     (SELECT c.period_id,
-             c.item_id,
-             sum(c.count_customer)   new_customers_count,
-             sum(c.payment_customer) new_customers_revenue
-        FROM customers c
-       WHERE c.count_customer = 1
-       GROUP BY c.period_id, c.item_id) new_customers
-    ON s.period_id = new_customers.period_id AND s.item_id = new_customers.item_id
-  LEFT JOIN
-     (SELECT c.period_id,
-             c.item_id,
-             sum(c.count_customer)   returning_customers_count,
-             sum(c.payment_customer) returning_customers_revenue
-        FROM customers c
-       WHERE c.count_customer > 1
-       GROUP BY c.period_id, c.item_id) returning_customers
-    ON s.period_id = returning_customers.period_id AND s.item_id = returning_customers.item_id
-  LEFT JOIN
-     (SELECT c.period_id,
-             c.item_id,
-             sum(c.count_customer)    refunded_customer_count,
-             sum(c.quantity_customer) customers_refunded
-        FROM refunded_customer c
-       GROUP BY c.period_id, c.item_id) refunded_customer
-    ON s.period_id = refunded_customer.period_id AND s.item_id = refunded_customer.item_id
-ON CONFLICT DO NOTHING;
+   select t2.*
+  from ( SELECT s.period_name AS p1,
+         s.period_id AS p2,
+         s.item_id AS p3,
+         new_customers.new_customers_count AS p4,
+         new_customers.new_customers_revenue AS p5,
+         returning_customers.returning_customers_count AS p6,
+         returning_customers.returning_customers_revenue AS p7,
+         refunded_customer.refunded_customer_count AS p8,
+         refunded_customer.customers_refunded AS p9
+   FROM summary_ids s
+   LEFT JOIN
+      (SELECT c.period_id,
+               c.item_id,
+               sum(c.count_customer)   new_customers_count,
+               sum(c.payment_customer) new_customers_revenue
+         FROM customers c
+         WHERE c.count_customer = 1
+         GROUP BY c.period_id, c.item_id) new_customers
+      ON s.period_id = new_customers.period_id AND s.item_id = new_customers.item_id
+   LEFT JOIN
+      (SELECT c.period_id,
+               c.item_id,
+               sum(c.count_customer)   returning_customers_count,
+               sum(c.payment_customer) returning_customers_revenue
+         FROM customers c
+         WHERE c.count_customer > 1
+         GROUP BY c.period_id, c.item_id) returning_customers
+      ON s.period_id = returning_customers.period_id AND s.item_id = returning_customers.item_id
+   LEFT JOIN
+      (SELECT c.period_id,
+               c.item_id,
+               sum(c.count_customer)    refunded_customer_count,
+               sum(c.quantity_customer) customers_refunded
+         FROM refunded_customer c
+         GROUP BY c.period_id, c.item_id) refunded_customer
+      ON s.period_id = refunded_customer.period_id AND s.item_id = refunded_customer.item_id ) AS t2
+   where NOT EXISTS (
+      select *
+      from mart.f_customer_retention as fcr
+      where fcr.period_name =t2.p1 AND
+            fcr.period_id = t2.p2 AND
+            fcr.item_id = t2.p3 AND
+             );
+
+
+
