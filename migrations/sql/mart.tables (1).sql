@@ -80,11 +80,11 @@ CREATE INDEX f_sales_4 ON mart.f_sales (city_id);
 CREATE TABLE mart.f_customer_retention (
 	period_name					TEXT,
 	period_id					TEXT,
-	item_id						BIGINT,
-	new_customers_count			BIGINT,
-	new_customers_revenue		NUMERIC(14,2),
-	returning_customers_count	BIGINT,
-	returning_customers_revenue	NUMERIC(14,2),
-	refunded_customers_count	BIGINT,
-	customers_refunded			BIGINT
-	);
+	item_id						BIGINT DEFAULT 0,
+	new_customers_count			BIGINT DEFAULT 0,
+	new_customers_revenue		NUMERIC(14,2) DEFAULT 0,
+	returning_customers_count	BIGINT DEFAULT 0,
+	returning_customers_revenue	NUMERIC(14,2) DEFAULT 0,
+	refunded_customers_count	BIGINT DEFAULT 0,
+	customers_refunded			BIGINT DEFAULT 0
+	)

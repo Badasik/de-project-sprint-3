@@ -39,15 +39,16 @@ WITH summary AS (
                   FROM summary
      )
    select t2.*
-  from ( SELECT s.period_name AS p1,
-         s.period_id AS p2,
-         s.item_id AS p3,
-         new_customers.new_customers_count AS p4,
-         new_customers.new_customers_revenue AS p5,
-         returning_customers.returning_customers_count AS p6,
-         returning_customers.returning_customers_revenue AS p7,
-         refunded_customer.refunded_customer_count AS p8,
-         refunded_customer.customers_refunded AS p9
+  from ( SELECT 
+         case when s.period_name is null then '0' else  s.period_name end AS p1,
+         case when s.period_id is null then '0' else s.period_id end AS p2,
+         case when s.item_id  is null then 0 else s.item_id end AS p3,
+         case when new_customers.new_customers_count is null then 0 else new_customers.new_customers_count end AS p4,
+         case when new_customers.new_customers_revenue is null then 0 else new_customers.new_customers_revenue end AS p5,
+         case when returning_customers.returning_customers_count is null then 0 else returning_customers.returning_customers_count end AS p6,
+         case when returning_customers.returning_customers_revenue is null then 0 else returning_customers.returning_customers_revenue end AS p7,
+         case when refunded_customer.refunded_customer_count is null then 0 else refunded_customer.refunded_customer_count end AS p8,
+         case when refunded_customer.customers_refunded is null then 0 else refunded_customer.customers_refunded end AS p9
    FROM summary_ids s
    LEFT JOIN
       (SELECT c.period_id,
@@ -78,9 +79,15 @@ WITH summary AS (
    where NOT EXISTS (
       select *
       from mart.f_customer_retention as fcr
-      where fcr.period_name =t2.p1 AND
+      where fcr.period_name = t2.p1 AND
             fcr.period_id = t2.p2 AND
             fcr.item_id = t2.p3 AND
+            new_customers_count = t2.p4 AND
+	         new_customers_revenue = t2.p5 AND
+	         returning_customers_count = t2.p6 AND
+	         returning_customers_revenue = t2.p7 AND
+	         refunded_customers_count = t2.p8 AND
+	         customers_refunded = t2.p9
              );
 
 
